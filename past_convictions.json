@@ -1,6 +1,6 @@
 [
-  { "token": "1coin", "symbol": "1coin", "reason": "High volatility but strong meme presence and liquidity depth.", "date": "2025-09-12" },
-  { "token": "chillhouse", "symbol": "chillhouse", "reason": "Solana ecosystem expansion and social media momentum.", "date": "2025-08-05" },
-  { "token": "tokabu", "symbol": "tokabu", "reason": "Long-term meme dominance and Elon-backed awareness.", "date": "2025-07-10" }
+  { "token": "1coin", "symbol": "1coin", "reason": "High volatility but strong meme presence and liquidity depth.", "date": "2025-09-12    PAST" },
+  { "token": "chillhouse", "symbol": "chillhouse", "reason": "Solana ecosystem expansion and social media momentum.", "date": "2025-08-05  PAST" },
+  { "token": "tokabu", "symbol": "tokabu", "reason": "Long-term meme dominance and Elon-backed awareness.", "date": "2025-07-10    PAST" }
 ]
 

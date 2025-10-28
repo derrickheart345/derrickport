@@ -10,6 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+    /* Base + color tokens */
     :root{
       --bg:#03040a;
       --violet:#7c3aed;
@@ -19,18 +20,21 @@
       --muted:#93a4b8;
       --card-shadow: 0 10px 40px rgba(2,6,23,0.7);
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{
-      background:
-        radial-gradient(900px 400px at 12% 12%, rgba(124,58,237,0.08), transparent 8%),
-        radial-gradient(800px 320px at 88% 88%, rgba(6,182,212,0.06), transparent 9%),
-        var(--bg);
-      color:#e6eef8;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
+
+    /* Prevent horizontal scrolling and improve text rendering */
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; background: radial-gradient(900px 400px at 12% 12%, rgba(124,58,237,0.08), transparent 8%), radial-gradient(800px 320px at 88% 88%, rgba(6,182,212,0.06), transparent 9%), var(--bg); color:#e6eef8; overflow-x:hidden; }
+
+    /* Responsive scalable typography using clamp */
+    :root {
+      --h1: clamp(1.6rem, 2.2vw + 1.2rem, 3rem);
+      --h2: clamp(1.25rem, 1.6vw + 0.9rem, 2rem);
+      --base: clamp(0.9rem, 1vw + 0.1rem, 1rem);
+      --muted-size: clamp(0.72rem, 0.9vw + 0.1rem, 0.88rem);
     }
 
-    /* Glass */
+    body { font-size: var(--base); line-height:1.45; }
+
+    /* Glass card */
     .glass{
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008));
       border:1px solid var(--glass-border);
@@ -40,61 +44,91 @@
       border-radius:14px;
     }
 
-    /* tilt */
-    .tilt { transform-style:preserve-3d; perspective:900px; transition: transform .26s cubic-bezier(.2,.9,.3,1), box-shadow .22s; }
-    .tilt:hover { transform: translateY(-10px) rotateX(4deg) rotateY(-6deg) scale(1.015); box-shadow:0 24px 60px rgba(2,6,23,0.75); }
-    @media(max-width:640px){ .tilt:hover{ transform:none; box-shadow:0 8px 22px rgba(2,6,23,0.45);} }
+    /* tilt hover for non-mobile */
+    .tilt { transform-style:preserve-3d; perspective:900px; transition: transform .26s cubic-bezier(.2,.9,.3,1), box-shadow .22s; will-change: transform; }
+    @media (hover:hover) and (min-width:640px){
+      .tilt:hover { transform: translateY(-10px) rotateX(4deg) rotateY(-6deg) scale(1.015); box-shadow:0 24px 60px rgba(2,6,23,0.75); }
+    }
 
-    .img-cover{ width:100%; height:100%; object-fit:cover; object-position:center; }
+    /* images */
+    .img-cover{ width:100%; height:100%; object-fit:cover; object-position:center; display:block; }
 
+    /* Ticker */
     .ticker{
       background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
       border:1px solid rgba(255,255,255,0.04);
       padding:8px 12px;
       border-radius:12px;
-      display:flex; gap:18px; align-items:center; min-width:360px;
+      display:flex; gap:12px; align-items:center; min-width:0; max-width:100%;
     }
 
-    .badge{ display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background: linear-gradient(90deg,var(--violet),var(--cyan)); color:#03060a; font-weight:700; font-size:0.88rem; box-shadow:0 8px 28px rgba(6,182,212,0.06); }
+    .badge{ display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background: linear-gradient(90deg,var(--violet),var(--cyan)); color:#03060a; font-weight:700; font-size:0.88rem; box-shadow:0 8px 28px rgba(6,182,212,0.06); white-space:nowrap; }
 
     /* floating animation */
-    @keyframes floaty { 0%{transform:translateY(0)} 50%{transform:translateY(-8px)} 100%{transform:translateY(0)} }
+    @keyframes floaty { 0%{transform:translateY(0)} 50%{transform:translateY(-6px)} 100%{transform:translateY(0)} }
     .floaty { animation: floaty 7.5s ease-in-out infinite; }
 
     /* win badge */
-    .win-badge{ position:absolute; top:12px; right:12px; padding:6px 10px; border-radius:8px; font-weight:800; color:white; box-shadow:0 8px 20px rgba(124,58,237,0.28); background:linear-gradient(90deg,var(--cyan),var(--violet)); transform:translateZ(40px); }
+    .win-badge{ position:absolute; top:12px; right:12px; padding:6px 10px; border-radius:8px; font-weight:800; color:white; box-shadow:0 8px 20px rgba(124,58,237,0.28); background:linear-gradient(90deg,var(--cyan),var(--violet)); transform:translateZ(40px); font-size:0.85rem; }
 
-    /* animated glow after countup */
+    /* animated glow after countup (subtle) */
     .glow-after { animation: glowPulse 2s ease-in-out infinite alternate; }
-    @keyframes glowPulse { from { box-shadow:0 6px 18px rgba(124,58,237,0.12);} to { box-shadow:0 20px 48px rgba(124,58,237,0.26);} }
+    @keyframes glowPulse { from { box-shadow:0 6px 18px rgba(124,58,237,0.08);} to { box-shadow:0 18px 40px rgba(124,58,237,0.16);} }
 
     /* small UI tweaks */
-    .small-muted { color:var(--muted); font-size:0.88rem; }
-    .skill-chip { display:inline-block; padding:8px 10px; border-radius:999px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); margin:6px; font-weight:600; color:#eaf2ff; }
-    .section-title { font-size:1.25rem; font-weight:700; }
+    .small-muted { color:var(--muted); font-size:var(--muted-size); }
+    .skill-chip { display:inline-block; padding:8px 10px; border-radius:999px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); margin:6px; font-weight:600; color:#eaf2ff; font-size:0.95rem;}
+    .section-title { font-size: var(--h2); font-weight:700; color: #e6eef8; }
 
-    /* chart canvas sizing for small widgets */
+    /* chart sizing - wrappers control height to be responsive */
     .chart-widget { width:100%; height:160px; }
     .doughnut-small { width:140px; height:140px; }
 
     /* Conviction cards - minimal dark look (no glow) */
-    .conviction-container { display:block; }
     .conviction-card {
-      background: rgba(10,10,12,0.6);
+      background: rgba(12,12,14,0.6);
       border: 1px solid rgba(255,255,255,0.03);
       border-radius:12px;
       padding:16px;
-      box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+      box-shadow: 0 6px 18px rgba(2,6,23,0.45);
       color: #dceafe;
     }
-    .conviction-card h3 { font-weight:800; font-size:1.25rem; margin-bottom:6px; color: #e6eef8; }
-    .conviction-meta { color: var(--muted); font-size:0.85rem; margin-top:6px; }
+    .conviction-card h3 { font-weight:800; font-size:1.05rem; margin-bottom:6px; color: #e6eef8; }
+    .conviction-meta { color: var(--muted); font-size:0.85rem; margin-top:8px; display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; }
+
+    /* Past convictions grid (responsive) */
     .past-grid { display:grid; gap:12px; grid-template-columns: repeat(1, minmax(0,1fr)); }
     @media(min-width:640px){ .past-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
     @media(min-width:1024px){ .past-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
 
-    /* small helpers */
+    /* Fade-in classes */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 520ms cubic-bezier(.2,.9,.25,1), transform 520ms cubic-bezier(.2,.9,.25,1);
+      will-change: opacity, transform;
+    }
+    .fade-in.in-view {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* helpers */
     .muted-xs { color: var(--muted); font-size:0.82rem; }
+    .centered { text-align:center; }
+
+    /* small screens tweaks */
+    @media(max-width:420px){
+      .img-cover.h-64 { height:220px; }
+      .chart-widget { height:220px; }
+    }
+
+    /* keep animations reduced if user prefers */
+    @media (prefers-reduced-motion: reduce) {
+      .floaty { animation: none !important; }
+      .tilt { transition: none !important; }
+      .fade-in { transition: none !important; opacity:1; transform:none; }
+    }
   </style>
 </head>
 <body>
@@ -102,24 +136,24 @@
   <!-- TOP TICKER & HEADER -->
   <div class="max-w-6xl mx-auto p-5">
     <div class="flex items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <img src="profile.jpg" alt="Derrick" class="w-14 h-14 rounded-full object-cover ring-2 ring-white/8 shadow-lg" />
-        <div>
-          <div class="text-sm text-slate-300">Derrick</div>
-          <div class="font-semibold">@NvrBlameDerrick • <span class="small-muted">PSN:</span> <span class="font-bold">Run_hide_die1</span></div>
+      <div class="flex items-center gap-4 min-w-0">
+        <img src="profile.jpg" alt="Derrick" class="w-14 h-14 rounded-full object-cover ring-2 ring-white/8 shadow-lg flex-shrink-0" />
+        <div class="min-w-0">
+          <div class="text-sm text-slate-300 truncate">Derrick</div>
+          <div class="font-semibold truncate">@NvrBlameDerrick • <span class="small-muted">PSN:</span> <span class="font-bold">Run_hide_die1</span></div>
         </div>
       </div>
 
       <div class="flex items-center gap-4">
-        <div class="ticker glass">
-          <div>
+        <div class="ticker glass" style="min-width:280px; max-width:420px;">
+          <div style="min-width:0">
             <div class="small-muted text-xs">Portfolio</div>
-            <div id="portfolioTicker" class="text-lg font-bold">US$ 39,420,000</div>
+            <div id="portfolioTicker" class="text-lg font-bold truncate">US$ 39,420,000</div>
           </div>
           <div style="width:1px;height:36px;background:rgba(255,255,255,0.03)"></div>
-          <div>
+          <div style="min-width:0">
             <div class="small-muted text-xs">Memecoin</div>
-            <div id="memeTicker" class="text-lg font-semibold">US$ 3,420,000</div>
+            <div id="memeTicker" class="text-lg font-semibold truncate">US$ 3,420,000</div>
           </div>
           <div style="width:1px;height:36px;background:rgba(255,255,255,0.03)"></div>
           <div class="flex items-center gap-2">
@@ -131,15 +165,15 @@
     </div>
   </div>
 
-  <main class="max-w-6xl mx-auto px-6 pb-20">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-20">
 
     <!-- HERO -->
-    <section class="mt-6 grid md:grid-cols-2 gap-8 items-center">
+    <section class="mt-6 grid md:grid-cols-2 gap-6 items-center fade-in" data-fade>
       <div>
-        <h1 class="text-4xl md:text-5xl font-extrabold">Derrick — <span style="background:linear-gradient(90deg,var(--violet),var(--cyan));-webkit-background-clip:text;color:transparent">Gamer. Trader. Meme Prophet.</span></h1>
+        <h1 class="text-4xl md:text-5xl font-extrabold" style="font-size:var(--h1)">Derrick — <span style="background:linear-gradient(90deg,var(--violet),var(--cyan));-webkit-background-clip:text;color:transparent">Gamer. Trader. Meme Prophet.</span></h1>
         <p class="mt-3 text-slate-300 max-w-lg">World's unbeaten sniper. Former SBA Clan leader (BF4). I only play shooters — Battlefield, Call of Duty, Apex, Warzone, CS2. Computer Scientist. I buy coins and I tweet.</p>
 
-        <div class="mt-6 flex gap-3">
+        <div class="mt-6 flex gap-3 flex-wrap">
           <div class="glass px-4 py-2 rounded-md tilt">
             <div class="text-xs small-muted">Role</div>
             <div class="font-semibold">Gamer • Meme Trader • CS</div>
@@ -171,8 +205,8 @@
       </div>
 
       <div class="glass p-4 tilt floaty">
-        <div class="relative w-full h-64 rounded-xl overflow-hidden">
-          <img src="profile.jpg" alt="Derrick" class="img-cover"/>
+        <div class="relative w-full h-64 rounded-xl overflow-hidden img-cover h-64">
+          <img src="profile.jpg" alt="Derrick" class="img-cover h-64" />
           <div class="absolute left-4 bottom-4">
             <div class="text-sm text-slate-300">@NvrBlameDerrick</div>
             <div class="text-white text-xl font-semibold">Derrick</div>
@@ -193,16 +227,17 @@
     </section>
 
     <!-- CURRENT + PAST CONVICTIONS (added above portfolio) -->
-    <section id="convictions" class="mt-10">
+    <section id="convictions" class="mt-8 fade-in" data-fade>
       <div class="flex items-center justify-between">
         <h2 class="section-title">Convictions — Current & Past</h2>
+        <div class="small-muted">Text-only — minimal dark cards</div>
       </div>
 
       <div class="mt-6 grid gap-6">
         <!-- Current conviction: single card -->
         <div id="currentConvictionWrap" class="conviction-container max-w-4xl mx-auto">
           <div id="currentConvictionCard" class="conviction-card">
-            <p class="muted-xs">Loading current conviction...</p>
+            <p class="muted-xs centered">Loading current conviction...</p>
           </div>
         </div>
 
@@ -210,15 +245,15 @@
         <div id="pastConvictionsWrap" class="max-w-6xl mx-auto">
           <div id="pastConvictionsGrid" class="past-grid">
             <div class="conviction-card">
-              <p class="muted-xs">Loading past convictions...</p>
+              <p class="muted-xs centered">Loading past convictions...</p>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- MEMECOINS GRID (with replacements and new entries) -->
-    <section id="memecoins" class="mt-10">
+    <!-- MEMECOINS GRID (unchanged images retained) -->
+    <section id="memecoins" class="mt-10 fade-in" data-fade>
       <div class="flex items-center justify-between">
         <h2 class="section-title">Memecollect — Wins & Flexes</h2>
         <div class="small-muted">Local custom coin images used for character coins</div>
@@ -228,12 +263,12 @@
         <!-- DOGE -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="https://assets.coingecko.com/coins/images/5/small/dogecoin.png?1696010716" alt="DOGE" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Dogecoin (DOGE)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Dogecoin (DOGE)</div>
               <div class="text-xs small-muted">Classic • Community</div>
             </div>
           </div>
@@ -241,15 +276,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- PEPE (local image) -->
+        <!-- PEPE -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="pepe.webp" alt="PEPE" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">PEPE</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">PEPE</div>
               <div class="text-xs small-muted">Explosive • Viral</div>
             </div>
           </div>
@@ -257,15 +292,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- SHIB (local image, 10,000x) -->
+        <!-- SHIB -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+10,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="shib.webp" alt="SHIB" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Shiba Inu (SHIB)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Shiba Inu (SHIB)</div>
               <div class="text-xs small-muted">Retail legend</div>
             </div>
           </div>
@@ -273,15 +308,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="10000">0×</span></div>
         </article>
 
-        <!-- Fartcoin (f.webp) -->
+        <!-- Fartcoin -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="f.webp" alt="Fartcoin" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Fartcoin (FART)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Fartcoin (FART)</div>
               <div class="text-xs small-muted">Pure chaos • Party coin</div>
             </div>
           </div>
@@ -289,15 +324,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- PNUT (p.webp) -->
+        <!-- PNUT -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="p.webp" alt="PNUT" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">PNUT (PNUT)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">PNUT (PNUT)</div>
               <div class="text-xs small-muted">Crunchy returns</div>
             </div>
           </div>
@@ -305,15 +340,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Zerebro (z.webp) -->
+        <!-- Zerebro -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="z.webp" alt="Zerebro" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Zerebro (ZRB)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Zerebro (ZRB)</div>
               <div class="text-xs small-muted">Neural vibes</div>
             </div>
           </div>
@@ -321,15 +356,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Chill Guy (ch.webp) -->
+        <!-- Chill Guy -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="ch.webp" alt="Chill Guy" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Chill Guy (CHILL)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Chill Guy (CHILL)</div>
               <div class="text-xs small-muted">Relaxed riches</div>
             </div>
           </div>
@@ -337,15 +372,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Goatseus Maximum (g.webp) -->
+        <!-- Goatseus Max -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="g.webp" alt="Goatseus Maximum" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Goatseus Max (GOAT)</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Goatseus Max (GOAT)</div>
               <div class="text-xs small-muted">Alpha goat energy</div>
             </div>
           </div>
@@ -353,15 +388,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Chillhouse (new fun coin) -->
+        <!-- Chillhouse -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="f.webp" alt="Chillhouse" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Chillhouse</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Chillhouse</div>
               <div class="text-xs small-muted">Club vibes</div>
             </div>
           </div>
@@ -369,15 +404,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Pwease (new) -->
+        <!-- Pwease -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="p.webp" alt="Pwease" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Pwease</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Pwease</div>
               <div class="text-xs small-muted">Begging to the moon</div>
             </div>
           </div>
@@ -385,15 +420,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Fartboy (new) -->
+        <!-- Fartboy -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="f.webp" alt="Fartboy" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Fartboy</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Fartboy</div>
               <div class="text-xs small-muted">Legendary meme</div>
             </div>
           </div>
@@ -401,15 +436,15 @@
           <div class="mt-3 text-sm"><span class="small-muted">Gain</span> <span class="gain-target" data-target="1000">0×</span></div>
         </article>
 
-        <!-- Farthouse (new) -->
+        <!-- Farthouse -->
         <article class="glass p-5 tilt relative overflow-hidden">
           <div class="win-badge">+1,000×</div>
-          <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-16 h-16 rounded-lg bg-white/5 overflow-hidden flex-shrink-0">
               <img src="g.webp" alt="Farthouse" class="img-cover"/>
             </div>
-            <div class="flex-1">
-              <div class="font-semibold">Farthouse</div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">Farthouse</div>
               <div class="text-xs small-muted">Hype home</div>
             </div>
           </div>
@@ -421,7 +456,7 @@
     </section>
 
     <!-- PORTFOLIO HIGHLIGHTS & WINS (with small chart widgets) -->
-    <section class="mt-12 grid md:grid-cols-2 gap-6 items-start">
+    <section class="mt-12 grid md:grid-cols-2 gap-6 items-start fade-in" data-fade>
       <div class="glass p-6 tilt">
         <h3 class="text-xl font-semibold">Portfolio Highlights</h3>
         <div class="mt-3 text-slate-300">Bought <strong>155 BTC in 2018</strong>. I’m a gamer that buys coins, tweets loud and holds core BTC. Memecoin runs are the highlight reels.</div>
@@ -433,8 +468,8 @@
             <div class="text-xs small-muted mt-2">Range: US$ 36M — 45M</div>
 
             <!-- small line chart widget -->
-            <div class="mt-4">
-              <canvas id="portfolioGrowthChart" class="chart-widget"></canvas>
+            <div class="mt-4" style="height:200px;">
+              <canvas id="portfolioGrowthChart" class="chart-widget" style="height:100%;"></canvas>
             </div>
           </div>
 
@@ -444,8 +479,10 @@
             <div class="text-xs small-muted mt-2">Range: US$ 3M — 4M</div>
 
             <!-- small doughnut chart for memecoin distribution -->
-            <div class="mt-4 flex items-center gap-4">
-              <canvas id="memeDistributionChart" class="doughnut-small"></canvas>
+            <div class="mt-4 flex flex-col sm:flex-row items-center gap-4">
+              <div style="width:140px; height:140px;">
+                <canvas id="memeDistributionChart" class="doughnut-small"></canvas>
+              </div>
               <div>
                 <div class="font-semibold">Top Bags</div>
                 <div class="text-xs small-muted mt-2">SHIB, DOGE, PEPE, FART...</div>
@@ -488,7 +525,7 @@
     </section>
 
     <!-- ANIME -->
-    <section id="anime" class="mt-12">
+    <section id="anime" class="mt-12 fade-in" data-fade>
       <h2 class="section-title">Anime — Visual Fuel</h2>
       <div class="mt-6 grid sm:grid-cols-2 md:grid-cols-4 gap-6">
         <div class="glass overflow-hidden tilt"><img src="naruto.webp" alt="Naruto" class="img-cover h-48 w-full"/><div class="p-3"><div class="font-semibold">Naruto</div><div class="text-xs small-muted">Endurance & legacy</div></div></div>
@@ -506,11 +543,10 @@
     </section>
 
     <!-- GAMING: Battlefield & COD + shooters -->
-    <section id="gaming" class="mt-12">
+    <section id="gaming" class="mt-12 fade-in" data-fade>
       <h2 class="section-title">Shooter Hall — Battlefield & Call of Duty (All Titles)</h2>
 
       <div class="mt-6 grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        <!-- Battlefield list -->
         <div class="glass p-4 tilt">
           <div class="font-semibold">Battlefield Series</div>
           <ul class="mt-3 text-slate-300 list-disc ml-5">
@@ -525,7 +561,6 @@
           </ul>
         </div>
 
-        <!-- Call of Duty list -->
         <div class="glass p-4 tilt">
           <div class="font-semibold">Call of Duty Series</div>
           <ul class="mt-3 text-slate-300 list-disc ml-5">
@@ -540,7 +575,6 @@
           </ul>
         </div>
 
-        <!-- Other shooters -->
         <div class="glass p-4 tilt">
           <div class="font-semibold">Other Shooters</div>
           <ul class="mt-3 text-slate-300 list-disc ml-5">
@@ -551,7 +585,6 @@
           </ul>
         </div>
 
-        <!-- Legend card -->
         <div class="glass p-4 tilt">
           <div class="font-semibold">Achievements</div>
           <ul class="mt-3 text-slate-300 list-disc ml-5">
@@ -564,7 +597,7 @@
     </section>
 
     <!-- ABOUT & SKILLS -->
-    <section id="about" class="mt-12">
+    <section id="about" class="mt-12 fade-in" data-fade>
       <h2 class="section-title">About — Computer Scientist</h2>
       <div class="mt-4 grid md:grid-cols-2 gap-6">
         <div class="glass p-6 tilt">
@@ -608,10 +641,10 @@
   </main>
 
   <script>
-    // Year
+    // Footer year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // tiny tilt parallax for desktop
+    // tiny tilt parallax for desktop (only applies if hover is available)
     if(window.matchMedia('(min-width:640px)').matches){
       document.querySelectorAll('.tilt').forEach(card => {
         card.addEventListener('mousemove', (e) => {
@@ -670,15 +703,8 @@
         requestAnimationFrame(tick);
       });
     }
-    window.addEventListener('load', () => {
-      setTimeout(animateCountUps, 350);
-      initCharts();
-      // load convictions after charts and initial animations
-      fetchConviction();
-      fetchPastConvictions();
-    });
 
-    // Charts (Chart.js) - small dashboard widgets
+    // Charts init - responsive
     function initCharts(){
       // Portfolio Growth - mock data
       const pCtx = document.getElementById('portfolioGrowthChart').getContext('2d');
@@ -707,7 +733,7 @@
         }
       });
 
-      // Meme distribution - mock shares
+      // Meme distribution - doughnut
       const mCtx = document.getElementById('memeDistributionChart').getContext('2d');
       new Chart(mCtx, {
         type: 'doughnut',
@@ -729,7 +755,30 @@
       });
     }
 
-    // Fetch conviction.json and render current conviction
+    // Fade-in on scroll using IntersectionObserver
+    function initFadeInObserver(){
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            entry.target.classList.add('in-view');
+            // once visible, unobserve to avoid re-triggers
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('[data-fade]').forEach(el => {
+        el.classList.add('fade-in');
+        observer.observe(el);
+      });
+    }
+
+    // Convictions fetching + rendering
+    function escapeHtml(str){
+      if(typeof str !== 'string') return '';
+      return str.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+    }
+
     function fetchConviction(){
       const wrap = document.getElementById('currentConvictionCard');
       fetch('conviction.json', { cache: "no-store" })
@@ -738,32 +787,29 @@
           return res.json();
         })
         .then(data => {
-          // defensive: ensure expected fields exist
           const token = data.token || data.name || 'Unknown';
           const symbol = data.symbol ? ` (${data.symbol})` : '';
           const reason = data.reason || '';
           const confidence = data.confidence || '';
           const updated = data.updated || '';
-
           wrap.innerHTML = `
             <div>
               <h3>${escapeHtml(token)}${escapeHtml(symbol)}</h3>
-              <div class="muted-xs">${escapeHtml(reason)}</div>
+              <div class="muted-xs" style="margin-top:6px">${escapeHtml(reason)}</div>
               <div class="conviction-meta">
                 <span><strong>Confidence:</strong> ${escapeHtml(confidence)}</span>
-                <span style="margin-left:12px">•</span>
-                <span style="margin-left:8px">${escapeHtml(updated)}</span>
+                <span>•</span>
+                <span>${escapeHtml(updated)}</span>
               </div>
             </div>
           `;
         })
         .catch(err => {
-          wrap.innerHTML = `<p class="muted-xs" style="color:#fca5a5">Unable to load current conviction.</p>`;
+          wrap.innerHTML = `<p class="muted-xs centered" style="color:#fca5a5">Unable to load current conviction.</p>`;
           console.warn('fetchConviction error', err);
         });
     }
 
-    // Fetch past_convictions.json and render list (text-only)
     function fetchPastConvictions(){
       const grid = document.getElementById('pastConvictionsGrid');
       fetch('past_convictions.json', { cache: "no-store" })
@@ -773,7 +819,7 @@
         })
         .then(list => {
           if(!Array.isArray(list) || list.length === 0){
-            grid.innerHTML = `<div class="conviction-card"><p class="muted-xs">No past convictions found.</p></div>`;
+            grid.innerHTML = `<div class="conviction-card"><p class="muted-xs centered">No past convictions found.</p></div>`;
             return;
           }
           grid.innerHTML = '';
@@ -786,37 +832,39 @@
             card.className = 'conviction-card';
             card.innerHTML = `
               <h3>${escapeHtml(token)}${escapeHtml(symbol)}</h3>
-              <div class="muted-xs">${escapeHtml(reason)}</div>
+              <div class="muted-xs" style="margin-top:6px">${escapeHtml(reason)}</div>
               <div class="conviction-meta">${escapeHtml(date)}</div>
             `;
             grid.appendChild(card);
           });
         })
         .catch(err => {
-          grid.innerHTML = `<div class="conviction-card"><p class="muted-xs" style="color:#fca5a5">Unable to load past convictions.</p></div>`;
+          grid.innerHTML = `<div class="conviction-card"><p class="muted-xs centered" style="color:#fca5a5">Unable to load past convictions.</p></div>`;
           console.warn('fetchPastConvictions error', err);
         });
     }
 
-    // small helper to avoid XSS if JSON is edited locally
-    function escapeHtml(str){
-      if(typeof str !== 'string') return '';
-      return str
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    // respect reduce motion
+    // Respect reduced motion
     const prefersReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if(prefersReduce){
       document.querySelectorAll('.floaty').forEach(n => n.style.animation = 'none');
       document.querySelectorAll('.tilt').forEach(n => n.style.transition = 'none');
+      document.querySelectorAll('.fade-in').forEach(n => n.style.transition = 'none');
     }
+
+    // Run on load
+    window.addEventListener('load', () => {
+      setTimeout(animateCountUps, 350);
+      initCharts();
+      initFadeInObserver();
+      // load convictions after charts and initial animations
+      fetchConviction();
+      fetchPastConvictions();
+
+      // Make charts resize on orientation change / resize
+      window.addEventListener('orientationchange', () => { setTimeout(() => { window.dispatchEvent(new Event('resize')); }, 350); });
+      window.addEventListener('resize', () => { /* Chart.js handles responsive canvas */ });
+    });
   </script>
 </body>
 </html>
-
-
