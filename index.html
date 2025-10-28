@@ -76,6 +76,25 @@
     /* chart canvas sizing for small widgets */
     .chart-widget { width:100%; height:160px; }
     .doughnut-small { width:140px; height:140px; }
+
+    /* Conviction cards - minimal dark look (no glow) */
+    .conviction-container { display:block; }
+    .conviction-card {
+      background: rgba(10,10,12,0.6);
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius:12px;
+      padding:16px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.5);
+      color: #dceafe;
+    }
+    .conviction-card h3 { font-weight:800; font-size:1.25rem; margin-bottom:6px; color: #e6eef8; }
+    .conviction-meta { color: var(--muted); font-size:0.85rem; margin-top:6px; }
+    .past-grid { display:grid; gap:12px; grid-template-columns: repeat(1, minmax(0,1fr)); }
+    @media(min-width:640px){ .past-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media(min-width:1024px){ .past-grid { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+
+    /* small helpers */
+    .muted-xs { color: var(--muted); font-size:0.82rem; }
   </style>
 </head>
 <body>
@@ -168,6 +187,32 @@
           <div class="p-3">
             <div class="text-xs small-muted">Vibe</div>
             <div class="font-semibold">Anime • Shooters • Night</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CURRENT + PAST CONVICTIONS (added above portfolio) -->
+    <section id="convictions" class="mt-10">
+      <div class="flex items-center justify-between">
+        <h2 class="section-title">Convictions — Current & Past</h2>
+        <div class="small-muted">Text-only — minimal dark cards</div>
+      </div>
+
+      <div class="mt-6 grid gap-6">
+        <!-- Current conviction: single card -->
+        <div id="currentConvictionWrap" class="conviction-container max-w-4xl mx-auto">
+          <div id="currentConvictionCard" class="conviction-card">
+            <p class="muted-xs">Loading current conviction...</p>
+          </div>
+        </div>
+
+        <!-- Past convictions: responsive grid -->
+        <div id="pastConvictionsWrap" class="max-w-6xl mx-auto">
+          <div id="pastConvictionsGrid" class="past-grid">
+            <div class="conviction-card">
+              <p class="muted-xs">Loading past convictions...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -629,6 +674,9 @@
     window.addEventListener('load', () => {
       setTimeout(animateCountUps, 350);
       initCharts();
+      // load convictions after charts and initial animations
+      fetchConviction();
+      fetchPastConvictions();
     });
 
     // Charts (Chart.js) - small dashboard widgets
@@ -680,6 +728,86 @@
           plugins: { legend: { position: 'bottom', labels: { color: '#cbd5e1' } } }
         }
       });
+    }
+
+    // Fetch conviction.json and render current conviction
+    function fetchConviction(){
+      const wrap = document.getElementById('currentConvictionCard');
+      fetch('conviction.json', { cache: "no-store" })
+        .then(res => {
+          if(!res.ok) throw new Error('Network response not ok');
+          return res.json();
+        })
+        .then(data => {
+          // defensive: ensure expected fields exist
+          const token = data.token || data.name || 'Unknown';
+          const symbol = data.symbol ? ` (${data.symbol})` : '';
+          const reason = data.reason || '';
+          const confidence = data.confidence || '';
+          const updated = data.updated || '';
+
+          wrap.innerHTML = `
+            <div>
+              <h3>${escapeHtml(token)}${escapeHtml(symbol)}</h3>
+              <div class="muted-xs">${escapeHtml(reason)}</div>
+              <div class="conviction-meta">
+                <span><strong>Confidence:</strong> ${escapeHtml(confidence)}</span>
+                <span style="margin-left:12px">•</span>
+                <span style="margin-left:8px">${escapeHtml(updated)}</span>
+              </div>
+            </div>
+          `;
+        })
+        .catch(err => {
+          wrap.innerHTML = `<p class="muted-xs" style="color:#fca5a5">Unable to load current conviction.</p>`;
+          console.warn('fetchConviction error', err);
+        });
+    }
+
+    // Fetch past_convictions.json and render list (text-only)
+    function fetchPastConvictions(){
+      const grid = document.getElementById('pastConvictionsGrid');
+      fetch('past_convictions.json', { cache: "no-store" })
+        .then(res => {
+          if(!res.ok) throw new Error('Network response not ok');
+          return res.json();
+        })
+        .then(list => {
+          if(!Array.isArray(list) || list.length === 0){
+            grid.innerHTML = `<div class="conviction-card"><p class="muted-xs">No past convictions found.</p></div>`;
+            return;
+          }
+          grid.innerHTML = '';
+          list.forEach(item => {
+            const token = item.token || item.name || 'Unknown';
+            const symbol = item.symbol ? ` (${item.symbol})` : '';
+            const reason = item.reason || '';
+            const date = item.date || item.updated || '';
+            const card = document.createElement('div');
+            card.className = 'conviction-card';
+            card.innerHTML = `
+              <h3>${escapeHtml(token)}${escapeHtml(symbol)}</h3>
+              <div class="muted-xs">${escapeHtml(reason)}</div>
+              <div class="conviction-meta">${escapeHtml(date)}</div>
+            `;
+            grid.appendChild(card);
+          });
+        })
+        .catch(err => {
+          grid.innerHTML = `<div class="conviction-card"><p class="muted-xs" style="color:#fca5a5">Unable to load past convictions.</p></div>`;
+          console.warn('fetchPastConvictions error', err);
+        });
+    }
+
+    // small helper to avoid XSS if JSON is edited locally
+    function escapeHtml(str){
+      if(typeof str !== 'string') return '';
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
     }
 
     // respect reduce motion
